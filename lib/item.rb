@@ -1,6 +1,8 @@
+require_relative './time_formatter'
 require 'bigdecimal'
 
 class Item
+  include TimeFormatter
   attr_reader :id,
               :name,
               :description,
@@ -20,13 +22,7 @@ class Item
     @parent      = parent
   end
 
-  def format_time(time_string)
-    unless time_string == ""
-      Time.parse(time_string)
-    end
-  end
-
   def merchant
-    @parent.find_merchant_by_merchant_id(self.merchant_id)
+    @parent.find_merchant_by_merchant_id(merchant_id)
   end
 end
