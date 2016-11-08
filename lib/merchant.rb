@@ -1,7 +1,3 @@
-require_relative './item_repo'
-require_relative './merchant_repo'
-require_relative './invoice_repo'
-
 class Merchant
   attr_reader :name,
               :id,
@@ -22,5 +18,12 @@ class Merchant
 
   def invoices
     @parent.find_invoices_by_merchant_id(id)
+  end
+
+  def customers
+    invoices = @parent.find_invoices_by_merchant_id(id)
+    invoices.map do |invoice|
+      @parent.find_customer_by_customer_id(invoice.customer_id)
+    end.uniq
   end
 end

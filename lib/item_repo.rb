@@ -6,7 +6,7 @@ class ItemRepo
   attr_reader :all
 
   def initialize(file, parent = nil)
-    @all = parse_data(file).map { |row| Item.new(row, self) }
+    @all    = parse_data(file).map { |row| Item.new(row, self) }
     @parent = parent
   end
 
@@ -19,7 +19,9 @@ class ItemRepo
   end
 
   def find_all_with_description(description_fragment)
-    @all.find_all {|item| item.description.downcase.include?(description_fragment.downcase)}
+    @all.find_all do |item|
+      item.description.downcase.include?(description_fragment.downcase)
+    end
   end
 
   def find_all_by_price(price)

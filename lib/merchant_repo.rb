@@ -7,7 +7,7 @@ class MerchantRepo
   attr_reader :all
 
   def initialize(file, parent = nil)
-    @all = parse_data(file).map { |row| Merchant.new(row, self) }
+    @all    = parse_data(file).map { |row| Merchant.new(row, self) }
     @parent = parent
   end
 
@@ -31,8 +31,16 @@ class MerchantRepo
     @parent.find_invoices_by_merchant_id(id)
   end
 
+  def find_invoices_by_customer_id(id)
+    @parent.find_invoices_by_customer_id(id)
+  end
+
   def find_invoice_items_by_merchant_id(id)
     @parent.find_invoice_items_by_merchant_id(id)
+  end
+
+  def find_customer_by_customer_id(id)
+    @parent.find_customer_by_customer_id(id)
   end
 
   def inspect
