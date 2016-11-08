@@ -85,10 +85,9 @@ class SalesAnalyst
     end
   end
 
-
   def top_days_by_invoice_count
-    above_std_deviation = sorted_by_day_pairs.find_all do |day, value|
-      value if value > average_invoices_per_day + standard_deviation_for_days
+    above_std_deviation = sorted_by_day_pairs.find_all do |day, invoice_count|
+      invoice_count if invoice_count > average_invoices_per_day + std_deviation
     end
     above_std_deviation.map { |pair| pair[0] }
   end
@@ -102,7 +101,7 @@ class SalesAnalyst
   def total_revenue_by_date(date)
     sales_engine.invoices.all.reduce(0) do |result, invoice|
       if invoice.created_at.to_s.split(" ")[0].eql?(date.to_s.split[0])
-        result +=  total_invoice_items_revenue(result, invoice)
+        result += total_invoice_items_revenue(result, invoice)
       end
       result
     end.to_d.round(2)
@@ -151,14 +150,14 @@ class SalesAnalyst
     squared_differences.reduce(:+) / 7
   end
 
-  def standard_deviation_for_days
+  def std_deviation
     Math.sqrt(squared_differences_mean).round
   end
 
   def total_invoice_items_revenue(result, invoice)
-    invoice.invoice_items.reduce(0) do |result, invoice_item|
-      result += invoice_item.unit_price * invoice_item.quantity
-      result
+    invoice.invoice_items.reduce(0) do |sum, invoice_item|
+      sum += invoice_item.unit_price * invoice_item.quantity
+      sum
     end
   end
 
