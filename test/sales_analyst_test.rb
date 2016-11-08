@@ -14,7 +14,7 @@ class SalesAnalystTest < Minitest::Test
     assert_equal 2.88, SalesAnalyst.new(se).average_items_per_merchant
   end
 
-  def test_sales_analyst_can_calculate_average_items_per_merchant_with_standard_deviation
+  def test_sales_analyst_can_find_average_items_per_merchant_with_standard_deviation
     se = SalesEngine.from_csv(file_path)
     assert_equal 3.26, SalesAnalyst.new(se).average_items_per_merchant_standard_deviation
   end
@@ -45,27 +45,27 @@ class SalesAnalystTest < Minitest::Test
     assert_equal 10.49, SalesAnalyst.new(se).average_invoices_per_merchant
   end
 
-  def test_sales_analyst_can_calculate_average_invoices_per_merchant_with_standard_deviation
+  def test_sales_analyst_can_find_average_invoices_per_merchant_with_standard_deviation
     se = SalesEngine.from_csv(file_path)
     assert_equal 3.29, SalesAnalyst.new(se).average_invoices_per_merchant_standard_deviation
   end
 
-  def test_sales_analyst_can_calculate_top_merchants_by_invoice_count
+  def test_sales_analyst_can_find_top_merchants_by_invoice_count
     se = SalesEngine.from_csv(file_path)
     assert_equal 12, SalesAnalyst.new(se).top_merchants_by_invoice_count.count
   end
 
-  def test_sales_analyst_can_calculate_bottom_merchants_by_invoice_count
+  def test_sales_analyst_can_find_bottom_merchants_by_invoice_count
     se = SalesEngine.from_csv(file_path)
     assert_equal 4, SalesAnalyst.new(se).bottom_merchants_by_invoice_count.count
   end
 
-  def test_sales_analyst_can_calculate_top_days_by_invoice_count
+  def test_sales_analyst_can_find_top_days_by_invoice_count
     se = SalesEngine.from_csv(file_path)
     assert_equal ["Wednesday"], SalesAnalyst.new(se).top_days_by_invoice_count
   end
 
-  def test_sales_analyst_can_calculate_percentage_of_invoices_that_are_shipped_pending_returned
+  def test_sales_analyst_can_find_percentage_of_invoices_that_are_shipped_pending_returned
     se = SalesEngine.from_csv(file_path)
     assert_equal 29.55, SalesAnalyst.new(se).invoice_status(:pending)
     assert_equal 56.95, SalesAnalyst.new(se).invoice_status(:shipped)
@@ -77,6 +77,12 @@ class SalesAnalystTest < Minitest::Test
     expected = BigDecimal.new('0.0', 9)
     assert_equal expected, SalesAnalyst.new(se).total_revenue_by_date(Time.parse("2012-03-27"))
   end
+
+  # def test_sales_analyst_can_find_top_revenue_earners
+  #   se = SalesEngine.from_csv(file_path)
+  #   assert_instance_of Merchant, SalesAnalyst.new(se).top_revenue_earners(10).first.class
+  #   assert_equal 10, SalesAnalyst.new(se).top_revenue_earners(10).count
+  # end
 
   def test_sales_analyst_can_find_total_revenue_by_merchant_id
     se = SalesEngine.from_csv(file_path)
