@@ -115,6 +115,10 @@ class SalesAnalyst
     sorted_merchants.take(merchant_count)
   end
 
+  def merchants_ranked_by_revenue
+    top_revenue_earners(@sales_engine.merchants.all.count)
+  end
+
   def revenue_by_merchant(merchant_id)
     invoices = @sales_engine.merchants.find_invoices_by_merchant_id(merchant_id)
     invoices.reduce(0) do |result, invoice|
@@ -142,18 +146,11 @@ class SalesAnalyst
     end
   end
 
-  # def most_sold_item_for_merchant(merchant_id)
-  #   @sales_engine.merchants.all.find_all do |merchant|
-  #     if merchant.invoices.status.eql?(:shipped)
-  #     binding.pry
-  #   end
-  #need successful transactions
-
-  #then we need the items
-  #sort items by type(group them)
-  #count items in group
-  #extract the most sold item
-
+  def most_sold_item_for_merchant(merchant_id)
+    @sales_engine.merchants.all.find_all do |merchant|
+      if merchant.invoices.status.eql?(:shipped)
+      binding.pry
+    end
 
   private
   def grouped_invoices_by_day

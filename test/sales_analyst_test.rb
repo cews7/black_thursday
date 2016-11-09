@@ -108,6 +108,13 @@ class SalesAnalystTest < Minitest::Test
     assert_equal expected, SalesAnalyst.new(se).revenue_by_merchant(12334871)
   end
 
+  def test_sales_analyst_can_find_all_merchants_ranked_by_revenue
+    se = SalesEngine.from_csv(file_path)
+    assert_instance_of Merchant, SalesAnalyst.new(se).merchants_ranked_by_revenue.first
+    assert_instance_of Merchant, SalesAnalyst.new(se).merchants_ranked_by_revenue.first
+    assert_equal 123123213, SalesAnalyst.new(se).merchants_ranked_by_revenue.first.id
+  end
+
   def test_sales_analyst_can_find_most_sold_item_for_merchant
     se = SalesEngine.from_csv(file_path)
     assert_equal [], SalesAnalyst.new(se).most_sold_item_for_merchant(12334871)
