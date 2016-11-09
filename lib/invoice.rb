@@ -4,12 +4,12 @@ require 'bigdecimal'
 class Invoice
   include TimeFormatter
   attr_reader :id,
-              :customer_id,
-              :merchant_id,
-              :status,
-              :created_at,
-              :updated_at,
-              :parent
+  :customer_id,
+  :merchant_id,
+  :status,
+  :created_at,
+  :updated_at,
+  :parent
 
   def initialize(invoice_data, parent = nil)
     @id          = invoice_data[:id].to_i
@@ -48,9 +48,13 @@ class Invoice
   end
 
   def total
-    invoice_items.each.reduce(0) do |result, invoice_item|
-      result += (invoice_item.unit_price) * invoice_item.quantity
-      result
+    if is_paid_in_full?
+      invoice_items.each.reduce(0) do |result, invoice_item|
+        result += ((invoice_item.unit_price) * invoice_item.quantity)
+        result
+      end
+    else
+      0
     end
   end
 end

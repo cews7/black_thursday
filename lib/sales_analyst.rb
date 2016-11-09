@@ -14,10 +14,10 @@ class SalesAnalyst
   end
 
   def average_items_per_merchant_standard_deviation
-    sqr_differences = @sales_engine.merchants.all.map do |merchant|
+    sqr_diff = @sales_engine.merchants.all.map do |merchant|
       (merchant.items.length - average_items_per_merchant)** 2
     end
-    Math.sqrt(sqr_differences.reduce(:+) / @sales_engine.merchants.all.count).round(2)
+    Math.sqrt(sqr_diff.reduce(:+) / @sales_engine.merchants.all.count).round(2)
   end
 
 
@@ -56,14 +56,14 @@ class SalesAnalyst
   end
 
   def average_invoices_per_merchant
-    (@sales_engine.all_invoices.to_f / @sales_engine.all_merchants.to_f).round(2)
+    (@sales_engine.all_invoices.to_f/@sales_engine.all_merchants.to_f).round(2)
   end
 
   def average_invoices_per_merchant_standard_deviation
-    sqr_differences = @sales_engine.merchants.all.map do |merchant|
+    sqr_diff = @sales_engine.merchants.all.map do |merchant|
       (merchant.invoices.length - average_invoices_per_merchant)** 2
     end
-    Math.sqrt(sqr_differences.reduce(:+) /
+    Math.sqrt(sqr_diff.reduce(:+) /
     @sales_engine.merchants.all.count).round(2)
   end
 
@@ -107,29 +107,53 @@ class SalesAnalyst
     end.to_d.round(2)
   end
 
-  # def revenue_per_merchant(merchant_id)
-  #   invoices = @sales_engine.find_invoices_by_merchant_id(merchant_id)
-  #   invoices.reduce(0) do |result, invoice|
-  #     result += invoice.total
-  #     result
-  #   end
-  # end
-  #
-  # def total_revenue
-  #   merchants = @sales_engine.merchants.all
-  #   merchants.map { |merchant| revenue_per_merchant(merchant.id) }
-  # end
-  #
-  # def top_revenue_earners(merchant_count = 20)
-  #   total_revenue
-  # end
+  def top_revenue_earners(merchant_count = 20)
+    merchants = @sales_engine.merchants.all
+    sorted_merchants = merchants.sort_by do |merchant|
+      revenue_by_merchant(merchant.id).to_f
+    end.reverse
+    sorted_merchants.take(merchant_count)
+  end
 
   def revenue_by_merchant(merchant_id)
-    @sales_engine.merchants.find_invoices_by_merchant_id(merchant_id).reduce(0) do |result, invoice|
-      result += total_invoice_items_revenue(result, invoice)
+    invoices = @sales_engine.merchants.find_invoices_by_merchant_id(merchant_id)
+    invoices.reduce(0) do |result, invoice|
+      result += invoice.total
       result
     end.to_d.round(2)
   end
+
+  def merchants_with_only_one_item
+    @sales_engine.merchants.all.find_all do |merchant|
+      merchant.items.count.eql?(1)
+    end
+  end
+
+  def merchants_with_only_one_item_registered_in_month(month)
+    merchants_by_month = @sales_engine.merchants.all.find_all do |merchant|
+      merchant.created_at.strftime("%B").eql?(month.capitalize)
+    end
+    merchants_by_month & merchants_with_only_one_item
+  end
+
+  def merchants_with_pending_invoices
+    @sales_engine.merchants.all.select do |merchant|
+      merchant.invoices.any? { |invoice| !invoice.is_paid_in_full? }
+    end
+  end
+
+  # def most_sold_item_for_merchant(merchant_id)
+  #   @sales_engine.merchants.all.find_all do |merchant|
+  #     if merchant.invoices.status.eql?(:shipped)
+  #     binding.pry
+  #   end
+  #need successful transactions
+
+  #then we need the items
+  #sort items by type(group them)
+  #count items in group
+  #extract the most sold item
+
 
   private
   def grouped_invoices_by_day
@@ -183,7 +207,7 @@ class SalesAnalyst
     sq_differences = @sales_engine.items.all.map do |item|
       (item.unit_price - average)** 2
     end
-    Math.sqrt(sq_differences.reduce(:+) / @sales_engine.items.all.count).round(2)
+    Math.sqrt(sq_differences.reduce(:+)/@sales_engine.items.all.count).round(2)
   end
 
   def average_item_price
@@ -193,10 +217,10 @@ class SalesAnalyst
 
   def average_invoice_standard_deviation
     average = average_invoice_count
-    sqr_differences = @sales_engine.merchants.all.map do |merchant|
+    sqr_diff = @sales_engine.merchants.all.map do |merchant|
       (merchant.invoices.count - average)** 2
     end.reduce(:+)
-    Math.sqrt(sqr_differences / @sales_engine.merchants.all.count).round(2)
+    Math.sqrt(sqr_diff / @sales_engine.merchants.all.count).round(2)
   end
 
   def average_invoice_count

@@ -78,16 +78,40 @@ class SalesAnalystTest < Minitest::Test
     assert_equal expected, SalesAnalyst.new(se).total_revenue_by_date(Time.parse("2012-03-27"))
   end
 
-  # def test_sales_analyst_can_find_top_revenue_earners
-  #   se = SalesEngine.from_csv(file_path)
-  #   assert_instance_of Merchant, SalesAnalyst.new(se).top_revenue_earners(10).first.class
-  #   assert_equal 10, SalesAnalyst.new(se).top_revenue_earners(10).count
-  # end
+  def test_sales_analyst_can_find_top_revenue_earners
+    se = SalesEngine.from_csv(file_path)
+    assert_instance_of Merchant, SalesAnalyst.new(se).top_revenue_earners(10).first
+    assert_equal 10, SalesAnalyst.new(se).top_revenue_earners(10).count
+  end
+
+  def test_sales_analyst_can_find_merchants_with_only_one_item
+    se = SalesEngine.from_csv(file_path)
+    assert_equal 243, SalesAnalyst.new(se).merchants_with_only_one_item.count
+    assert_instance_of Merchant, SalesAnalyst.new(se).merchants_with_only_one_item.first
+  end
+
+  def test_sales_analyst_can_find_merchants_with_pending_invoices
+    se = SalesEngine.from_csv(file_path)
+    assert_equal 467, SalesAnalyst.new(se).merchants_with_pending_invoices.count
+    assert_instance_of Merchant, SalesAnalyst.new(se).merchants_with_pending_invoices.first
+  end
+
+  def test_sales_engine_can_find_merchants_with_only_one_item_registered_in_month
+    se = SalesEngine.from_csv(file_path)
+    assert_equal 21, SalesAnalyst.new(se).merchants_with_only_one_item_registered_in_month("March").count
+    assert_instance_of Merchant, SalesAnalyst.new(se).merchants_with_only_one_item_registered_in_month("March").first
+  end
 
   def test_sales_analyst_can_find_total_revenue_by_merchant_id
     se = SalesEngine.from_csv(file_path)
-    expected = BigDecimal.new('0.11639397E6',18)
+    expected = BigDecimal.new('0.5270115E5',18)
     assert_equal expected, SalesAnalyst.new(se).revenue_by_merchant(12334871)
+  end
+
+  def test_sales_analyst_can_find_most_sold_item_for_merchant
+    se = SalesEngine.from_csv(file_path)
+    assert_equal [], SalesAnalyst.new(se).most_sold_item_for_merchant(12334871)
+    assert_instance_of Item, SalesAnalyst.new(se).most_sold_item_for_merchant(12334871).first
   end
 
   def file_path
