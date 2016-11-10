@@ -147,68 +147,54 @@ class SalesAnalyst
   end
 
   def most_sold_item_for_merchant(merchant_id)
-   merchant = @sales_engine.merchants.find_by_id(merchant_id)
-   paid_invoices = merchant.invoices.map do |invoice|
-     if invoice.is_paid_in_full?
-       invoice.invoice_items
-     end
-   end.compact.flatten
+    top_quantity = total_quantity_of_item(merchant_id).max_by do |item, quant|
+      quant
+    end
+    top_items= total_quantity_of_item(merchant_id).select do |item_id, quantity|
+      quantity == top_quantity[1]
+    end
+    top_items.keys.map{ |item_id| @sales_engine.find_item_by_item_id(item_id) }
+  end
 
-  total_quantity_of_item = paid_invoices.reduce({}) do |hash, invoice_item|
-     if hash[invoice_item.item_id]
-       hash[invoice_item.item_id] += invoice_item.quantity
-     else
+
+  def best_item_for_merchant(merchant_id)
+    top_quantity = item_revenue(merchant_id).max_by{|i,r|r}
+    item_id = item_revenue(merchant_id).select do |item_id, quantity|
+      quantity == top_quantity[1]
+    end.keys.first
+    @sales_engine.find_item_by_item_id(item_id)
+  end
+
+  private
+  def paid_invoices(merchant_id)
+    merchant = @sales_engine.merchants.find_by_id(merchant_id)
+    merchant.invoices.map do |invoice|
+      invoice.invoice_items if invoice.is_paid_in_full?
+    end.compact.flatten
+  end
+
+  def total_quantity_of_item(merchant_id)
+    paid_invoices(merchant_id).reduce({}) do |hash, invoice_item|
+      if hash[invoice_item.item_id]
+        hash[invoice_item.item_id] += invoice_item.quantity
+      else
         hash[invoice_item.item_id] = invoice_item.quantity
       end
       hash
     end
-
-    top_quantity = total_quantity_of_item.max_by do |item_id, quantity|
-      quantity
-    end
-
-    x = total_quantity_of_item.select do |item_id, quantity|
-      quantity == top_quantity[1]
-    end
-
-    top_items = x.keys.map do |item_id|
-      @sales_engine.find_item_by_item_id(item_id)
-    end
   end
 
-  def best_item_for_merchant(merchant_id)
-    merchant = @sales_engine.merchants.find_by_id(merchant_id)
-    paid_invoices = merchant.invoices.map do |invoice|
-      if invoice.is_paid_in_full?
-        invoice.invoice_items
-      end
-    end.compact.flatten
-
-   total_quantity_of_item = paid_invoices.reduce({}) do |hash, invoice_item|
-      if hash[invoice_item.item_id]
-        hash[invoice_item.item_id] += invoice_item.quantity * invoice_item.unit_price
+  def item_revenue(merchant_id)
+    paid_invoices(merchant_id).reduce({}) do |id, invoice_item|
+      if id[invoice_item.item_id]
+        id[invoice_item.item_id]+=invoice_item.quantity*invoice_item.unit_price
       else
-         hash[invoice_item.item_id] = invoice_item.quantity * invoice_item.unit_price
-       end
-       hash
-     end
-
-     print total_quantity_of_item
-
-     top_quantity = total_quantity_of_item.max_by do |item_id, revenue|
-       revenue
-     end
-
-     item_id = total_quantity_of_item.select do |item_id, quantity|
-       quantity == top_quantity[1]
-     end.keys.first
-     
-    #  top_items = x.keys. do |item_id|
-       @sales_engine.find_item_by_item_id(item_id)
-    #  end
+        id[invoice_item.item_id]=invoice_item.quantity*invoice_item.unit_price
+      end
+      id
+    end
   end
 
-  private
   def grouped_invoices_by_day
     @sales_engine.invoices.all.group_by do |invoice|
       invoice.created_at.strftime("%A")
