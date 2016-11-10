@@ -4,12 +4,12 @@ require 'bigdecimal'
 class Invoice
   include TimeFormatter
   attr_reader :id,
-  :customer_id,
-  :merchant_id,
-  :status,
-  :created_at,
-  :updated_at,
-  :parent
+              :customer_id,
+              :merchant_id,
+              :status,
+              :created_at,
+              :updated_at,
+              :parent
 
   def initialize(invoice_data, parent = nil)
     @id          = invoice_data[:id].to_i

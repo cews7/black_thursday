@@ -147,10 +147,66 @@ class SalesAnalyst
   end
 
   def most_sold_item_for_merchant(merchant_id)
-    @sales_engine.merchants.all.find_all do |merchant|
-      if merchant.invoices.status.eql?(:shipped)
-      binding.pry
+   merchant = @sales_engine.merchants.find_by_id(merchant_id)
+   paid_invoices = merchant.invoices.map do |invoice|
+     if invoice.is_paid_in_full?
+       invoice.invoice_items
+     end
+   end.compact.flatten
+
+  total_quantity_of_item = paid_invoices.reduce({}) do |hash, invoice_item|
+     if hash[invoice_item.item_id]
+       hash[invoice_item.item_id] += invoice_item.quantity
+     else
+        hash[invoice_item.item_id] = invoice_item.quantity
+      end
+      hash
     end
+
+    top_quantity = total_quantity_of_item.max_by do |item_id, quantity|
+      quantity
+    end
+
+    x = total_quantity_of_item.select do |item_id, quantity|
+      quantity == top_quantity[1]
+    end
+
+    top_items = x.keys.map do |item_id|
+      @sales_engine.find_item_by_item_id(item_id)
+    end
+  end
+
+  def best_item_for_merchant(merchant_id)
+    merchant = @sales_engine.merchants.find_by_id(merchant_id)
+    paid_invoices = merchant.invoices.map do |invoice|
+      if invoice.is_paid_in_full?
+        invoice.invoice_items
+      end
+    end.compact.flatten
+
+   total_quantity_of_item = paid_invoices.reduce({}) do |hash, invoice_item|
+      if hash[invoice_item.item_id]
+        hash[invoice_item.item_id] += invoice_item.quantity * invoice_item.unit_price
+      else
+         hash[invoice_item.item_id] = invoice_item.quantity * invoice_item.unit_price
+       end
+       hash
+     end
+
+     print total_quantity_of_item
+
+     top_quantity = total_quantity_of_item.max_by do |item_id, revenue|
+       revenue
+     end
+
+     item_id = total_quantity_of_item.select do |item_id, quantity|
+       quantity == top_quantity[1]
+     end.keys.first
+     
+    #  top_items = x.keys. do |item_id|
+       @sales_engine.find_item_by_item_id(item_id)
+    #  end
+  end
 
   private
   def grouped_invoices_by_day
