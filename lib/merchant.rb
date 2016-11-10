@@ -1,14 +1,17 @@
+require_relative './time_formatter'
+
 class Merchant
+  include TimeFormatter
   attr_reader :name,
               :id,
               :created_at,
               :updated_at
 
-  def initialize(row, parent = nil)
-    @id         = row[:id].to_i
-    @name       = row[:name].to_s
-    @created_at = row[:created_at]
-    @updated_at = row[:updated_at]
+  def initialize(merchant_data, parent = nil)
+    @id         = merchant_data[:id].to_i
+    @name       = merchant_data[:name].to_s
+    @created_at = format_time(merchant_data[:created_at].to_s)
+    @updated_at = format_time(merchant_data[:created_at].to_s)
     @parent     = parent
   end
 

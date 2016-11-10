@@ -48,9 +48,13 @@ class Invoice
   end
 
   def total
-    invoice_items.each.reduce(0) do |result, invoice_item|
-      result += (invoice_item.unit_price) * invoice_item.quantity
-      result
+    if is_paid_in_full?
+      invoice_items.each.reduce(0) do |result, invoice_item|
+        result += ((invoice_item.unit_price) * invoice_item.quantity)
+        result
+      end
+    else
+      0
     end
   end
 end
